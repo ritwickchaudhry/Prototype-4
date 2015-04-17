@@ -212,7 +212,7 @@ double get_angle()                               // Return the angle turned by t
     /*************************
     88 pulses for 360 degrees => 4.090 degrees per count
 	The angle rotated is calculated by measuring the number of counts 
-	and multiplying it by 4.090 to ger the degrees
+	and multiplying it by 4.090 to get the degrees
 
     *************************/
 
@@ -420,13 +420,15 @@ void line_calc(double xfinal,double yfinal)
 {
     double slopeangle, dist;
 
-    slopeangle = atan2(xfinal - current_x , yfinal - current_y) * (180/pi);           // Calculate the slope of line between the current position of the bot and the final point.  
-    dist = sqrt(pow(yfinal-current_y,2) + pow(xfinal-current_x,2));                   //Calculates distance to be moved along the line calculated above.
+    slopeangle = atan2(xfinal - current_x , yfinal - current_y) * (180/pi);  // Calculate the slope of line between the current position of the bot and the final point.  
+    dist = sqrt(pow(yfinal-current_y,2) + pow(xfinal-current_x,2));          //Calculates distance to be moved along the line calculated above.
 
 /**************************************************************************************************************************************************
-While retreating back to its original position bot was showing around 15% error which was not acceptable.So after large number of hit and trials we 
-realized that if we reduce the speed of bot error reduces significantly.So we reduced the Pulse Width Modulation(PWM) of the motor which very much
-increased the accuracy of the bot.Thus we reduced the speed of the bot and set it to (100,100)
+While retreating back to its original position bot was showing around 15% error which was not acceptable.
+So after large number of hit and trials we realized that if we reduce the speed of bot error reduces 
+significantly.
+So we reduced the Pulse Width Modulation(PWM) of the motor which very much increased the accuracy of the bot.
+Thus we reduced the speed of the bot and set it to (100,100)
 **************************************************************************************************************************************************/
 
     velocity (100,100);                                                            
