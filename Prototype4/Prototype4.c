@@ -305,11 +305,11 @@ unsigned int convert(unsigned char reading)                   // Convert the cha
 
 void coordinate_calculation(double r)
 {
-    current_x =  init_x + r*sin(current_theta*pi/180.0);             // Calculate coordinates of the bot
+    current_x =  init_x + r*sin(current_theta*pi/180.0);             // Calculate coordinates of the bot. Changing coordinates to cartesian system from polar coordinates 
     current_y =  init_y + r*cos(current_theta*pi/180.0);
     if(current_x >= 0)
     {
-        lcd_cursor(1,13);
+        lcd_cursor(1,13);											 //Printing the x-coordinate on the LCD
         lcd_string("+");
         lcd_print(1,13,current_x,4);
     }
@@ -319,7 +319,7 @@ void coordinate_calculation(double r)
         lcd_string("-");
         lcd_print(1,13,(-1 * current_x),4);
     }
-    if(current_y >= 0)
+    if(current_y >= 0)												 //Printing the y-coordinate on the LCD
     {
         lcd_cursor(2,13);
         lcd_string("+");
