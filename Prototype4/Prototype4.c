@@ -410,7 +410,7 @@ void line_move(double dist, double angle)               // Move the bot along th
     else if((angle - current_theta)<0)                  //if rotation angle is negative it starts left rotation.
         Left_Rotation_Degrees(current_theta-angle);     //aligns the bot such that it face towards the final point.
 
-    move_forward((unsigned int)dist);                   //bot satrs moving forward towards the final point.
+    move_forward((unsigned int)dist);                   //bot starts moving forward towards the final point.
 
 }
 
