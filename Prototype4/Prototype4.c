@@ -479,7 +479,7 @@ SIGNAL(SIG_USART0_RECV) 		// ISR for receive complete interrupt
 
     if(data == 0x38 && distance>reference_distance) //ASCII value of 8
     {
-        forward_motion(); // Forward motion starts
+        forward_motion(); // Forward motion starts.
 
         init_x = current_x;
         init_y = current_y;
