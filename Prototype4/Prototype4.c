@@ -40,16 +40,16 @@ void Right_Encoder_Pin_Configuration(void)
 }
 
 
-void Left_Wheel_Interrupt_Pin(void) //Interrupt 4 enable
+void Left_Wheel_Interrupt_Pin(void) //Interrupt 4 enable for the Left Wheel
 {
     cli(); //Clears the global interrupt
-    EICRB = EICRB | 0x02; // INT4 is set to trigger with falling edge
+    EICRB = EICRB | 0x02; // Interrupt 4 is set to trigger at each falling edge only
     EIMSK = EIMSK | 0x10; // Enable Interrupt INT4 for left position encoder
     sei();   // Enables the global interrupt
 }
 
 
-void Right_Wheel_Interrupt_Pin(void) //Interrupt 5 enable
+void Right_Wheel_Interrupt_Pin(void) //Interrupt 5 enable for the Right Wheel
 {
     cli(); //Clears the global interrupt
     EICRB = EICRB | 0x08; // INT5 is set to trigger with falling edge
@@ -57,23 +57,24 @@ void Right_Wheel_Interrupt_Pin(void) //Interrupt 5 enable
     sei();   // Enables the global interrupt
 }
 
-//Function for in
+//Function for interrupt for the Left Wheel
 ISR(INT4_vect)
 {
-    Shaft_Counter_Left_Wheel ++;
+    Shaft_Counter_Left_Wheel ++;//It Increases the Left Wheel Counter Shaft value when the Left Wheel Interrupt increases. 
 }
 
+//Function for interrupt for the Left Wheel
 ISR(INT5_vect)
 {
-    Shaft_Counter_Right_Wheel ++;
+    Shaft_Counter_Right_Wheel ++;//It Increases the Right Wheel Counter Shaft value when the Right Wheel Interrupt increases.
 }
 
-
+//Function To Configure all the Motion Configurations.
 void Motion_Configurations()
 {
-    DDRA = 0x0F;
-    PORTA = 0x00;
-    DDRL = 0x18;
+    DDRA = 0x0F;//The Last 4 pins of the register A are set as output
+    PORTA = 0x00;//Both wheels at stop;
+    DDRL = 0x18;//For Enabling Motor Driver IC
     PORTL = 0x18;
 
 }
@@ -545,6 +546,14 @@ SIGNAL(SIG_USART0_RECV) 		// ISR for receive complete interrupt
         _delay_ms(10);
 		current_theta+=(get_angle()*3);
         //cli();
+		
+		/*
+		To Print the Current theta ( The angle from the Y-Axis )
+		The LCD cannot print negative values so that is taken care of
+		by the positive and negative signs that are displayed on the LCD
+		in case of the respective positive and negative values.		
+		*/
+		
         if(current_theta>=0)
         {
             lcd_cursor(1,2);
@@ -562,7 +571,7 @@ SIGNAL(SIG_USART0_RECV) 		// ISR for receive complete interrupt
 
     if(data == 0x37) //ASCII value of 7
     {
-        backtracking();
+        backtracking();		//The Backtracking function is called which tells the bot to return to (0,0) coordinates in real space.
     }
 
 
@@ -574,7 +583,7 @@ SIGNAL(SIG_USART0_RECV) 		// ISR for receive complete interrupt
 int main()
 {
     initialize();              // Initializes all the ports
-    lcd_init();
-    init_xbee();
-    while(1);
+    lcd_init();				   // Initializes the LCD
+    init_xbee();			   // Initializes the X-Bee
+    while(1);					
 }
