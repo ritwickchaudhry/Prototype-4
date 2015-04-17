@@ -468,21 +468,26 @@ SIGNAL(SIG_USART0_RECV) 		// ISR for receive complete interrupt
     unsigned char reading=Read_Sensor(11);
     double distance =convert(reading);
 
+		/*
+		The Forward/Backward motion is switched on for 50 ms for a little forward/backward motion on pressing 8/2 on the keyboard once.
+		After 50 ms the motor is stopped but still a delay of 10 ms is provided to let the motor die down completely.
+		The required transversed distance is calculated from the shaft counters.
+		Then the new coordinates are calculated using the coordinate_calculation function in which distance travelled from the previous
+		node is mentioned
+		A new node is formed after that which is further used for any further motions.
+		*/
 
     if(data == 0x38 && distance>reference_distance) //ASCII value of 8
     {
-        PORTA=0x06;
+        forward_motion(); // Forward motion starts
 
         init_x = current_x;
         init_y = current_y;
 
         sei();
         _delay_ms(80);
-
-        PORTA=0x00;
-
-        _delay_ms(10);
-
+        stop_motion();
+		_delay_ms(10);
         double dist_travelled = (Shaft_Counter_Left_Wheel+Shaft_Counter_Right_Wheel)*0.54;
         cli();
 
@@ -492,7 +497,7 @@ SIGNAL(SIG_USART0_RECV) 		// ISR for receive complete interrupt
 
     if(data == 0x32) //ASCII value of 2
     {
-        backward_motion(); //back
+        backward_motion(); //Backward Motion starts
 
         sei();
         _delay_ms(80);
@@ -511,7 +516,7 @@ SIGNAL(SIG_USART0_RECV) 		// ISR for receive complete interrupt
     }
 
 		/*
-		The Left/Right motion is switched on for 50 ms for a little right rotation on pressing 4/6 on the keyboard once.
+		The Left/Right motion is switched on for 50 ms for a little left/right rotation on pressing 4/6 on the keyboard once.
 		After 50 ms the motor is stopped but still a delay of 10 ms is provided to let the motor die down completely.
 		The required turned angle is called on from the get_angle function and the calibrated value is subtracted/added to the current theta.
 		Thus the value of the global variable current_theta is updated.
