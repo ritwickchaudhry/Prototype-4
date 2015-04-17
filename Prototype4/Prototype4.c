@@ -404,13 +404,13 @@ void move_forward(unsigned int dist)
 
 void line_move(double dist, double angle)               // Move the bot along the line previously calculated
 {
-    if((angle - current_theta)>0)
-        Right_Rotation_Degrees(angle - current_theta);
+    if((angle - current_theta)>0)                      //if rotation angle is positive it starts right rotation.
+        Right_Rotation_Degrees(angle - current_theta);  //aligns the bot such that it face towards the final point.
 
-    else if((angle - current_theta)<0)
-        Left_Rotation_Degrees(current_theta-angle);
+    else if((angle - current_theta)<0)                  //if rotation angle is negative it starts left rotation.
+        Left_Rotation_Degrees(current_theta-angle);     //aligns the bot such that it face towards the final point.
 
-    move_forward((unsigned int)dist);
+    move_forward((unsigned int)dist);                   //bot satrs moving forward towards the final point.
 
 }
 
@@ -420,12 +420,18 @@ void line_calc(double xfinal,double yfinal)
 {
     double slopeangle, dist;
 
-    slopeangle = atan2(xfinal - current_x , yfinal - current_y) * (180/pi);           // Calculate the slope of line and distance to be moved along it
-    dist = sqrt(pow(yfinal-current_y,2) + pow(xfinal-current_x,2));
+    slopeangle = atan2(xfinal - current_x , yfinal - current_y) * (180/pi);           // Calculate the slope of line between the current position of the bot and the final point.  
+    dist = sqrt(pow(yfinal-current_y,2) + pow(xfinal-current_x,2));                   //Calculates distance to be moved along the line calculated above.
 
-    velocity (100,100);
+/**************************************************************************************************************************************************
+While retreating back to its original position bot was showing around 15% error which was not acceptable.So after large number of hit and trials we 
+realized that if we reduce the speed of bot error reduces significantly.So we reduced the Pulse Width Modulation(PWM) of the motor which very much
+increased the accuracy of the bot.Thus we reduced the speed of the bot and set it to (100,100)
+**************************************************************************************************************************************************/
 
-    line_move(dist, slopeangle);
+    velocity (100,100);                                                            
+
+    line_move(dist, slopeangle);                                                    //bot starts moving along the calculated line.  
 
 }
 
@@ -433,7 +439,7 @@ void line_calc(double xfinal,double yfinal)
 
 void avoiding_obstacle(double distance)
 {
-    init_x = current_x;
+    init_x = current_x;                                     
     init_y = current_y;
 
     int counter=0;
