@@ -442,7 +442,12 @@ void avoiding_obstacle(double distance)
     line_calc(0,0);                                   // Recalculate the line to be traversed
 }
 
-
+/*
+This function activates the BCAS ( Bot Collision Avoidance System ) and thereby tells the bot to return to (0,0) 
+Therefore the function line_calc is called which calculates the required direction and distance to move to (0,0)
+and then tells the bot to rotate till that direction and start moving that required distance
+in that direction.
+*/
 
 void backtracking()
 {
