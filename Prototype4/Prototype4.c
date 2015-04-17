@@ -305,7 +305,7 @@ void Right_Rotation_Degrees(int Degrees)
 
 unsigned int convert(unsigned char reading)                  
  {
-     // Function to convert the character reading from the ADC to integer value
+     // Function to convert the character reading from the ADC to the calliberated integer value
     
 	int dist;
     dist = (int)(10.00*(2799.6*(1.00/(pow(reading,1.1546)))));
@@ -317,9 +317,18 @@ unsigned int convert(unsigned char reading)
 
 void coordinate_calculation(double r)
 {
-    current_x =  init_x + r*sin(current_theta*pi/180.0);             // Function to calculate coordinates of the bot and changing coordinates to Cartesian system from polar coordinates 
+    /* Function to calculate coordinates of the bot and changing coordinates to Cartesian system from polar coordinates
+	   change in coordinates from the previous node (init_x & init_y) is calculated 
+	   using the distance travelled(r) and current angle(current_theta) */
+	
+	current_x =  init_x + r*sin(current_theta*pi/180.0);              
     current_y =  init_y + r*cos(current_theta*pi/180.0);
-    if(current_x >= 0)
+    
+	
+	/* There are separate conditions for positive and negative coordinates as LCD cannot directly print negative nos.
+	   */
+	
+	if(current_x >= 0)
     {
         lcd_cursor(1,13);											 //Printing the x-coordinate on the LCD
         lcd_string("+");
@@ -358,11 +367,14 @@ double get_dist()
 
     *********************************************/
 
-    double distance_travelled_till_yet = 0.54*(Shaft_Counter_Left_Wheel+Shaft_Counter_Right_Wheel)/2;           // Calculate distance covered using data from the shaft encoders
-
-    coordinate_calculation(distance_travelled_till_yet);                    // Also update coordinates of the bot
-
-    lcd_print(1,2,distance_travelled_till_yet,5);
+    /* Function to return the distance travelled by the bot from the previous node
+	   Distance is calculated by measuring the counts of the shaft encoder
+	  */
+	
+	double distance_travelled_till_yet = 0.54*(Shaft_Counter_Left_Wheel+Shaft_Counter_Right_Wheel)/2;       
+		
+    // Also update coordinates of the bot
+	coordinate_calculation(distance_travelled_till_yet);                    
 
     return distance_travelled_till_yet;
 }
@@ -371,13 +383,22 @@ double get_dist()
 
 void check_dist_travelled(unsigned int dist)
 {
-    Shaft_Counter_Left_Wheel = 0;
+   /* Function to keep track of the distance traveled by the bot from the starting point
+      and also continuously keep checking for obstacles.
+	  If obstacles are detected the BCAS is activated. 
+	  */
+	
+	Shaft_Counter_Left_Wheel = 0;
 
-    Shaft_Counter_Right_Wheel = 0;                      // Keep track of the distance traveled by the bot from the starting point
-    // Also continuously keep checking for obstacles
-    while (1)
+    Shaft_Counter_Right_Wheel = 0;     
+    
+	/* Distance from the obstacle is measured using the Sharp Sensor and the value converted to an integer.
+	   If this value is less than the set reference distance, BCAS is activated.
+	   */
+	
+	while (1)
     {
-        unsigned char reading=Read_Sensor(11);
+        unsigned char reading=Read_Sensor(11);          
         double distance =convert(reading);
         if (distance<reference_distance)
         {
