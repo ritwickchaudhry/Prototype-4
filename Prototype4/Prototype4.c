@@ -439,10 +439,14 @@ increased the accuracy of the bot.Thus we reduced the speed of the bot and set i
 
 void avoiding_obstacle(double distance)
 {
-    init_x = current_x;                                     
-    init_y = current_y;
-
-    int counter=0;
+    init_x = current_x;                                       //sets the initial co-ordinates to the the co-ordinates where the bot detected the obstacle.
+    init_y = current_y;                                       // new initial co-ordinated are the new node.distance travelled will now be measured from this point.
+/*********************************************************************************************************************************
+To minimize the returning path of the bot it was necessary that bot clears the obstacle proportional to the size of the obstacle.
+To implement this we defined a counter which measures how many times bot have to turn to get clear from obstacle.Now the bot is
+moved proportional to the counter thus clearing the obstacle and also reducing the path length at the same time.
+*********************************************************************************************************************************/
+    int counter=0;                                         //initializing the counter value to zero.   
 
     while((unsigned int)distance<reference_distance+30)
     {
@@ -450,10 +454,10 @@ void avoiding_obstacle(double distance)
         unsigned char reading=Read_Sensor(11);
         distance =convert(reading);
 
-        counter++;
+        counter++;                                           //updating the counter.
     }
 
-    double move_dist = 10/cos(25*pi*counter/180) + 5;
+    double move_dist = 10/cos(25*pi*counter/180) + 5;        //moving the distance proportional to the counter.
 
     line_move(move_dist,current_theta);                 // Move the bot forward till obstacle is cleared
 
