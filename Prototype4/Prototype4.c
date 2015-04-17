@@ -50,7 +50,7 @@ void Right_Wheel_Interrupt_Pin(void) //Interrupt 5 enable
     sei();   // Enables the global interrupt
 }
 
-//Function for incrementing the shaft encoder value
+//Functions for incrementing the shaft encoder value
 ISR(INT4_vect)
 {
     Shaft_Counter_Left_Wheel ++;
@@ -317,7 +317,7 @@ unsigned int convert(unsigned char reading)
 
 void coordinate_calculation(double r)
 {
-    current_x =  init_x + r*sin(current_theta*pi/180.0);             // Calculate coordinates of the bot. Changing coordinates to cartesian system from polar coordinates 
+    current_x =  init_x + r*sin(current_theta*pi/180.0);             // Function to calculate coordinates of the bot and changing coordinates to Cartesian system from polar coordinates 
     current_y =  init_y + r*cos(current_theta*pi/180.0);
     if(current_x >= 0)
     {
@@ -459,6 +459,7 @@ void avoiding_obstacle(double distance)
 
     line_calc(0,0);                                   // Recalculate the line to be traversed
 }
+
 
 /*
 This function activates the BCAS ( Bot Collision Avoidance System ) and thereby tells the bot to return to (0,0) 

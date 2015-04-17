@@ -15,17 +15,17 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
   5 .debug_aranges 000000a0  00000000  00000000  00007360  2**3
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   000011f5  00000000  00000000  00007400  2**0
+  6 .debug_info   000011f7  00000000  00000000  00007400  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 00000347  00000000  00000000  000085f5  2**0
+  7 .debug_abbrev 00000347  00000000  00000000  000085f7  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   000006a2  00000000  00000000  0000893c  2**0
+  8 .debug_line   000006a8  00000000  00000000  0000893e  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  00000554  00000000  00000000  00008fe0  2**2
+  9 .debug_frame  00000554  00000000  00000000  00008fe8  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    00000499  00000000  00000000  00009534  2**0
+ 10 .debug_str    000004b5  00000000  00000000  0000953c  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    0000116f  00000000  00000000  000099cd  2**0
+ 11 .debug_loc    0000116f  00000000  00000000  000099f1  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -840,11 +840,11 @@ void Right_Encoder_Pin_Configuration(void)
 000004cc <Left_Wheel_Interrupt_Pin>:
 
 
-void Left_Wheel_Interrupt_Pin(void) //Interrupt 4 enable for the Left Wheel
+void Left_Wheel_Interrupt_Pin(void) //Interrupt 4 enable
 {
     cli(); //Clears the global interrupt
      4cc:	f8 94       	cli
-    EICRB = EICRB | 0x02; // Interrupt 4 is set to trigger at each falling edge only
+    EICRB = EICRB | 0x02; // INT4 is set to trigger with falling edge
      4ce:	ea e6       	ldi	r30, 0x6A	; 106
      4d0:	f0 e0       	ldi	r31, 0x00	; 0
      4d2:	80 81       	ld	r24, Z
@@ -860,7 +860,7 @@ void Left_Wheel_Interrupt_Pin(void) //Interrupt 4 enable for the Left Wheel
 000004de <Right_Wheel_Interrupt_Pin>:
 
 
-void Right_Wheel_Interrupt_Pin(void) //Interrupt 5 enable for the Right Wheel
+void Right_Wheel_Interrupt_Pin(void) //Interrupt 5 enable
 {
     cli(); //Clears the global interrupt
      4de:	f8 94       	cli
@@ -879,7 +879,7 @@ void Right_Wheel_Interrupt_Pin(void) //Interrupt 5 enable for the Right Wheel
 
 000004f0 <__vector_5>:
 
-//Function for interrupt for the Left Wheel
+//Functions for incrementing the shaft encoder value
 ISR(INT4_vect)
 {
      4f0:	1f 92       	push	r1
@@ -889,7 +889,7 @@ ISR(INT4_vect)
      4f8:	11 24       	eor	r1, r1
      4fa:	8f 93       	push	r24
      4fc:	9f 93       	push	r25
-    Shaft_Counter_Left_Wheel ++;//It Increases the Left Wheel Counter Shaft value when the Left Wheel Interrupt increases. 
+    Shaft_Counter_Left_Wheel ++;
      4fe:	80 91 1c 02 	lds	r24, 0x021C
      502:	90 91 1d 02 	lds	r25, 0x021D
      506:	01 96       	adiw	r24, 0x01	; 1
@@ -906,7 +906,6 @@ ISR(INT4_vect)
 
 0000051e <__vector_6>:
 
-//Function for interrupt for the Left Wheel
 ISR(INT5_vect)
 {
      51e:	1f 92       	push	r1
@@ -916,7 +915,7 @@ ISR(INT5_vect)
      526:	11 24       	eor	r1, r1
      528:	8f 93       	push	r24
      52a:	9f 93       	push	r25
-    Shaft_Counter_Right_Wheel ++;//It Increases the Right Wheel Counter Shaft value when the Right Wheel Interrupt increases.
+    Shaft_Counter_Right_Wheel ++;
      52c:	80 91 1e 02 	lds	r24, 0x021E
      530:	90 91 1f 02 	lds	r25, 0x021F
      534:	01 96       	adiw	r24, 0x01	; 1
@@ -933,15 +932,15 @@ ISR(INT5_vect)
 
 0000054c <Motion_Configurations>:
 
-//Function To Configure all the Motion Configurations.
+
 void Motion_Configurations()
 {
-    DDRA = 0x0F;//The Last 4 pins of the register A are set as output
+    DDRA = 0x0F;
      54c:	8f e0       	ldi	r24, 0x0F	; 15
      54e:	81 b9       	out	0x01, r24	; 1
-    PORTA = 0x00;//Both wheels at stop;
+    PORTA = 0x00;
      550:	12 b8       	out	0x02, r1	; 2
-    DDRL = 0x18;//For Enabling Motor Driver IC
+    DDRL = 0x18;
      552:	88 e1       	ldi	r24, 0x18	; 24
      554:	80 93 0a 01 	sts	0x010A, r24
     PORTL = 0x18;
@@ -952,9 +951,10 @@ void Motion_Configurations()
 
 0000055e <ADC_enable>:
 
-
-void ADC_enable()
+void ADC_enable()         
 {
+	// Function to enable the ADC and initialize the required registers
+	
     DDRF = 0x00;
      55e:	10 ba       	out	0x10, r1	; 16
     DDRK = 0x00;
@@ -976,7 +976,7 @@ void ADC_enable()
 0000057a <init_devices>:
 
 
-void init_devices()
+void init_devices()          // 
 {
     DDRC = 0xF7;
      57a:	87 ef       	ldi	r24, 0xF7	; 247
@@ -988,9 +988,10 @@ void init_devices()
      582:	08 95       	ret
 
 00000584 <uart0_init>:
+   char size: 8 bit
+   parity: Disabled  */
 
-
-void uart0_init(void)
+void uart0_init(void)  
 {
     UCSR0B = 0x00; //disable while setting baud rate
      584:	e1 ec       	ldi	r30, 0xC1	; 193
@@ -1014,9 +1015,10 @@ void uart0_init(void)
 
 000005a4 <initialize>:
 
-
-void initialize()
+void initialize()           
 {
+	// Function to call all the functions initializing the ports
+	
     Motion_Configurations();
      5a4:	0e 94 a6 02 	call	0x54c	; 0x54c <Motion_Configurations>
     ADC_enable();
@@ -1024,7 +1026,7 @@ void initialize()
     init_devices();
      5ac:	0e 94 bd 02 	call	0x57a	; 0x57a <init_devices>
 
-    cli();
+    cli();       // Clears the global interrupts
      5b0:	f8 94       	cli
 
     Left_Encoder_Pin_Configuration();
@@ -1036,7 +1038,7 @@ void initialize()
     Left_Wheel_Interrupt_Pin();
      5be:	0e 94 66 02 	call	0x4cc	; 0x4cc <Left_Wheel_Interrupt_Pin>
 
-    sei();
+    sei();       // Enables the global interrupts
      5c2:	78 94       	sei
 
 }
@@ -1044,10 +1046,11 @@ void initialize()
 
 000005c6 <init_xbee>:
 
-
-void init_xbee()
-{
-    cli();
+void init_xbee()               
+{   
+    // Calling the function to initialize serial communication via XBee
+	
+	cli();
      5c6:	f8 94       	cli
     uart0_init(); //Initialize UART1 for serial communication
      5c8:	0e 94 c2 02 	call	0x584	; 0x584 <uart0_init>
@@ -1057,49 +1060,44 @@ void init_xbee()
      5ce:	08 95       	ret
 
 000005d0 <Read_Sensor>:
-
-unsigned char Read_Sensor(unsigned char channel)
-{
-    unsigned char reading;
+{  
+	// Function to read the value from ADC and return it as an unsigned character
+    
+	unsigned char reading;
 
     if(channel>7)
      5d0:	88 30       	cpi	r24, 0x08	; 8
      5d2:	18 f0       	brcs	.+6      	; 0x5da <Read_Sensor+0xa>
-    {
-        ADCSRB = 0x08;
+    { ADCSRB = 0x08;
      5d4:	98 e0       	ldi	r25, 0x08	; 8
      5d6:	90 93 7b 00 	sts	0x007B, r25
-    }
+       }
 
     channel = channel & 0x07;
      5da:	87 70       	andi	r24, 0x07	; 7
-
     ADMUX= 0x20 | channel;
      5dc:	80 62       	ori	r24, 0x20	; 32
      5de:	80 93 7c 00 	sts	0x007C, r24
-
-    ADCSRA = ADCSRA | 0x40; //Set start conversion bit
+    ADCSRA = ADCSRA | 0x40;     //Set start conversion bit
      5e2:	ea e7       	ldi	r30, 0x7A	; 122
      5e4:	f0 e0       	ldi	r31, 0x00	; 0
      5e6:	80 81       	ld	r24, Z
      5e8:	80 64       	ori	r24, 0x40	; 64
      5ea:	80 83       	st	Z, r24
 
-    while((ADCSRA&0x10)==0) {} //Wait for ADC conversion to complete
+    while((ADCSRA&0x10)==0);  //Wait for ADC conversion to complete
      5ec:	80 81       	ld	r24, Z
      5ee:	84 ff       	sbrs	r24, 4
      5f0:	fd cf       	rjmp	.-6      	; 0x5ec <Read_Sensor+0x1c>
 
     reading=ADCH;
      5f2:	80 91 79 00 	lds	r24, 0x0079
-
     ADCSRA = ADCSRA|0x10; //clear ADIF (ADC Interrupt Flag) by writing 1 to it
      5f6:	ea e7       	ldi	r30, 0x7A	; 122
      5f8:	f0 e0       	ldi	r31, 0x00	; 0
      5fa:	90 81       	ld	r25, Z
      5fc:	90 61       	ori	r25, 0x10	; 16
      5fe:	90 83       	st	Z, r25
-
     ADCSRB = 0x00;
      600:	10 92 7b 00 	sts	0x007B, r1
 
@@ -1109,8 +1107,8 @@ unsigned char Read_Sensor(unsigned char channel)
      604:	08 95       	ret
 
 00000606 <forward_motion>:
-
-
+//------------------------------------------------------------------------
+// Motion functions: moving the bot forward, reverse, left and right
 
 void forward_motion()
 {
@@ -1132,7 +1130,7 @@ void backward_motion()
 
 00000612 <left_motion>:
 
-void left_motion()                            // Motion functions: moving the bot forward, reverse, left and right
+void left_motion()                           
 {
     PORTA = 0x05;
      612:	85 e0       	ldi	r24, 0x05	; 5
@@ -1163,7 +1161,7 @@ void stop_motion()
 
 
 
-void velocity (unsigned char left_motor, unsigned char right_motor)
+void velocity (unsigned char left_motor, unsigned char right_motor)       // Function to initialize the registers for motion control using PWM
 {
     OCR5AL = (unsigned char)left_motor;
      622:	80 93 28 01 	sts	0x0128, r24
@@ -1173,11 +1171,11 @@ void velocity (unsigned char left_motor, unsigned char right_motor)
      62a:	08 95       	ret
 
 0000062c <get_angle>:
+	The angle rotated is calculated by measuring the number of counts 
+	and multiplying it by 4.090 to ger the degrees
 
+    *************************/
 
-
-double get_angle()                               // Return the angle turned by the bot
-{
     double angle = 4.090*(Shaft_Counter_Right_Wheel + Shaft_Counter_Left_Wheel)/2;
      62c:	60 91 1e 02 	lds	r22, 0x021E
      630:	70 91 1f 02 	lds	r23, 0x021F
@@ -1231,7 +1229,11 @@ void Left_Rotation_Degrees(int Degrees)
      68a:	cf 93       	push	r28
      68c:	df 93       	push	r29
      68e:	8c 01       	movw	r16, r24
-    init_x = current_x;
+    /* Function to rotate bot to the left by a specified angle
+       The angle rotated is measured using data from the shaft encoders    
+	  */
+	
+	init_x = current_x;
      690:	80 91 18 02 	lds	r24, 0x0218
      694:	90 91 19 02 	lds	r25, 0x0219
      698:	a0 91 1a 02 	lds	r26, 0x021A
@@ -1249,15 +1251,11 @@ void Left_Rotation_Degrees(int Degrees)
      6c4:	90 93 09 02 	sts	0x0209, r25
      6c8:	a0 93 0a 02 	sts	0x020A, r26
      6cc:	b0 93 0b 02 	sts	0x020B, r27
-    /*************************
-    88 pulses for 360 degrees rotation 4.090 degrees per count
-
-    *************************/
 
     left_motion(); //Turn left
      6d0:	0e 94 09 03 	call	0x612	; 0x612 <left_motion>
 
-    float Reqd_Shaft_Counter = (float) Degrees/ 4.090; // division by resolution to get shaft count
+    float Reqd_Shaft_Counter = (float) Degrees/ 4.090;                // division by resolution to get shaft count
      6d4:	b8 01       	movw	r22, r16
      6d6:	88 27       	eor	r24, r24
      6d8:	77 fd       	sbrc	r23, 7
@@ -1284,7 +1282,7 @@ void Left_Rotation_Degrees(int Degrees)
     Shaft_Counter_Right_Wheel = 0;
      70a:	10 92 1f 02 	sts	0x021F, r1
      70e:	10 92 1e 02 	sts	0x021E, r1
-    double initial_theta = current_theta;                      // Rotate bot to the left by a specified angle
+    double initial_theta = current_theta;                      
      712:	c0 90 10 02 	lds	r12, 0x0210
      716:	d0 90 11 02 	lds	r13, 0x0211
      71a:	e0 90 12 02 	lds	r14, 0x0212
@@ -1313,8 +1311,8 @@ void Left_Rotation_Degrees(int Degrees)
      734:	f2 e0       	ldi	r31, 0x02	; 2
      736:	7f 2e       	mov	r7, r31
      738:	f0 2d       	mov	r31, r0
-    double initial_theta = current_theta;                      // Rotate bot to the left by a specified angle
-    // The angle rotated is measured using data from the shaft encoders
+    Shaft_Counter_Right_Wheel = 0;
+    double initial_theta = current_theta;                      
 
     while (1)
     {
@@ -1471,7 +1469,11 @@ void Right_Rotation_Degrees(int Degrees)
      870:	cf 93       	push	r28
      872:	df 93       	push	r29
      874:	8c 01       	movw	r16, r24
-    init_x = current_x;
+     /* Rotate bot to the right by a specified angle
+        The angle rotated is measured using data from the shaft encoders
+       */	 
+	 
+	init_x = current_x;
      876:	80 91 18 02 	lds	r24, 0x0218
      87a:	90 91 19 02 	lds	r25, 0x0219
      87e:	a0 91 1a 02 	lds	r26, 0x021A
@@ -1489,10 +1491,6 @@ void Right_Rotation_Degrees(int Degrees)
      8aa:	90 93 09 02 	sts	0x0209, r25
      8ae:	a0 93 0a 02 	sts	0x020A, r26
      8b2:	b0 93 0b 02 	sts	0x020B, r27
-    /*******************
-    88 pulses for 360 degrees rotation 4.090 degrees per count
-
-    ********************/
 
     right_motion(); //Turn right
      8b6:	0e 94 0c 03 	call	0x618	; 0x618 <right_motion>
@@ -1553,10 +1551,10 @@ void Right_Rotation_Degrees(int Degrees)
      91a:	f2 e0       	ldi	r31, 0x02	; 2
      91c:	7f 2e       	mov	r7, r31
      91e:	f0 2d       	mov	r31, r0
+    Shaft_Counter_Right_Wheel = 0;
     double initial_theta = current_theta;
-    // Rotate bot to the right by a specified angle
-    // The angle rotated is measured using data from the shaft encoders
-    while (1)
+    
+	while (1)
     {
         current_theta = initial_theta + get_angle();
      920:	0e 94 16 03 	call	0x62c	; 0x62c <get_angle>
@@ -1693,11 +1691,13 @@ void Right_Rotation_Degrees(int Degrees)
 
 
 
-unsigned int convert(unsigned char reading)                   // Convert the character reading from the ADC to intger value
-{
+unsigned int convert(unsigned char reading)                  
+ {
      a3a:	0f 93       	push	r16
      a3c:	1f 93       	push	r17
-    int dist;
+     // Function to convert the character reading from the ADC to integer value
+    
+	int dist;
     dist = (int)(10.00*(2799.6*(1.00/(pow(reading,1.1546)))));
      a3e:	68 2f       	mov	r22, r24
      a40:	70 e0       	ldi	r23, 0x00	; 0
@@ -2680,8 +2680,8 @@ void avoiding_obstacle(double distance)
     11ce:	08 95       	ret
 
 000011d0 <backtracking>:
-
-
+in that direction.
+*/
 
 void backtracking()
 {
