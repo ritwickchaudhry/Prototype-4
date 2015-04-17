@@ -278,15 +278,15 @@ void Left_Rotation_Degrees(int Degrees)
         current_theta = initial_theta - get_angle();
         if(current_theta<0)
         {
-            lcd_cursor(1,1);
+            lcd_cursor(1,2);
             lcd_string("-");
-            lcd_print(1,2,(-1 * current_theta),4);
+            lcd_print(1,3,(-1 * current_theta),4);
         }
         else
         {
-            lcd_cursor(1,1);
+            lcd_cursor(1,2);
             lcd_string("+");
-            lcd_print(1,2,current_theta,4);
+            lcd_print(1,3,current_theta,4);
         }
         if((Shaft_Counter_Right_Wheel+Shaft_Counter_Left_Wheel)/2 >= Reqd_Shaft_Counter)
             break;
@@ -314,15 +314,15 @@ void Right_Rotation_Degrees(int Degrees)
         current_theta = initial_theta + get_angle();
         if(current_theta<0)
         {
-            lcd_cursor(1,1);
+            lcd_cursor(1,2);
             lcd_string("-");
-            lcd_print(1,2,(-1 * current_theta),4);
+            lcd_print(1,3,(-1 * current_theta),4);
         }
         else
         {
-            lcd_cursor(1,1);
+            lcd_cursor(1,2);
             lcd_string("+");
-            lcd_print(1,2,current_theta,4);
+            lcd_print(1,3,current_theta,4);
         }
         if((Shaft_Counter_Right_Wheel+Shaft_Counter_Left_Wheel)/2 >= Reqd_Shaft_Counter)
             break;
@@ -504,7 +504,7 @@ void line_calc(double xfinal,double yfinal)
     Thus we reduced the speed of the bot and set it to (100,100)
     **************************************************************************************************************************************************/
 
-    velocity (100,100);
+    velocity (80,80);
 
     line_move(dist, slopeangle);                                                    //bot starts moving along the calculated line.
 
@@ -601,9 +601,9 @@ SIGNAL(SIG_USART0_RECV) 		// ISR for receive complete interrupt
         init_y = current_y;
 
         sei();
-        _delay_ms(80);
+        _delay_ms(64);
         stop_motion();
-        _delay_ms(10);
+        _delay_ms(20);
         double dist_travelled = (Shaft_Counter_Left_Wheel+Shaft_Counter_Right_Wheel)*0.54;
         cli();
 
@@ -616,11 +616,11 @@ SIGNAL(SIG_USART0_RECV) 		// ISR for receive complete interrupt
         backward_motion(); //Backward Motion starts
 
         sei();
-        _delay_ms(80);
+        _delay_ms(64);
 
         stop_motion();
 
-        _delay_ms(10);
+        _delay_ms(20);
 
         double dist_travelled = ((Shaft_Counter_Left_Wheel+Shaft_Counter_Right_Wheel)/2)*0.54*2;
         cli();
