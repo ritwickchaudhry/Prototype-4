@@ -510,10 +510,16 @@ SIGNAL(SIG_USART0_RECV) 		// ISR for receive complete interrupt
         init_y = current_y;
     }
 
+		/*
+		The Left/Right motion is switched on for 50 ms for a little right rotation on pressing 4/6 on the keyboard once.
+		After 50 ms the motor is stopped but still a delay of 10 ms is provided to let the motor die down completely.
+		The required turned angle is called on from the get_angle function and the calibrated value is subtracted/added to the current theta.
+		Thus the value of the global variable current_theta is updated.
+		*/
 
     if(data == 0x34) //ASCII value of 4
     {
-        left_motion();  //left
+        left_motion();  // Left Motion starts.
         sei();
         _delay_ms(50);
         stop_motion();
@@ -538,11 +544,10 @@ SIGNAL(SIG_USART0_RECV) 		// ISR for receive complete interrupt
     if(data == 0x36) //ASCII value of 6
     {
 
-        right_motion();  //right
-
+        right_motion();  // Right motion starts.
         sei();
-        _delay_ms(50);
-        stop_motion();
+        _delay_ms(50); 
+        stop_motion(); 
         _delay_ms(10);
 		current_theta+=(get_angle()*3);
         //cli();
