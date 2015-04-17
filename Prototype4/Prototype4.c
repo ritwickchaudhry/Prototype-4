@@ -1,21 +1,14 @@
-/*
- * 
- *
- * 
- *  
- */
-
-
-
 #define F_CPU 14745600
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
 #include "lcd.h"
 #include <math.h>
+
 #define pi 3.14157
 
-volatile int Shaft_Counter_Right_Wheel = 0;
+volatile int Shaft_Counter_Right_Wheel = 0;      
 volatile int Shaft_Counter_Left_Wheel = 0;
 
 double reference_distance=100;
@@ -40,16 +33,16 @@ void Right_Encoder_Pin_Configuration(void)
 }
 
 
-void Left_Wheel_Interrupt_Pin(void) //Interrupt 4 enable for the Left Wheel
+void Left_Wheel_Interrupt_Pin(void) //Interrupt 4 enable
 {
     cli(); //Clears the global interrupt
-    EICRB = EICRB | 0x02; // Interrupt 4 is set to trigger at each falling edge only
+    EICRB = EICRB | 0x02; // INT4 is set to trigger with falling edge
     EIMSK = EIMSK | 0x10; // Enable Interrupt INT4 for left position encoder
     sei();   // Enables the global interrupt
 }
 
 
-void Right_Wheel_Interrupt_Pin(void) //Interrupt 5 enable for the Right Wheel
+void Right_Wheel_Interrupt_Pin(void) //Interrupt 5 enable
 {
     cli(); //Clears the global interrupt
     EICRB = EICRB | 0x08; // INT5 is set to trigger with falling edge
@@ -57,31 +50,32 @@ void Right_Wheel_Interrupt_Pin(void) //Interrupt 5 enable for the Right Wheel
     sei();   // Enables the global interrupt
 }
 
-//Function for interrupt for the Left Wheel
+//Function for incrementing the shaft encoder value
 ISR(INT4_vect)
 {
-    Shaft_Counter_Left_Wheel ++;//It Increases the Left Wheel Counter Shaft value when the Left Wheel Interrupt increases. 
+    Shaft_Counter_Left_Wheel ++;
 }
 
-//Function for interrupt for the Left Wheel
 ISR(INT5_vect)
 {
-    Shaft_Counter_Right_Wheel ++;//It Increases the Right Wheel Counter Shaft value when the Right Wheel Interrupt increases.
+    Shaft_Counter_Right_Wheel ++;
 }
 
-//Function To Configure all the Motion Configurations.
+
 void Motion_Configurations()
 {
-    DDRA = 0x0F;//The Last 4 pins of the register A are set as output
-    PORTA = 0x00;//Both wheels at stop;
-    DDRL = 0x18;//For Enabling Motor Driver IC
+    DDRA = 0x0F;
+    PORTA = 0x00;
+    DDRL = 0x18;
     PORTL = 0x18;
 
 }
 
 
-void ADC_enable()
+void ADC_enable()         
 {
+	// Function to enable the ADC and initialize the required registers
+	
     DDRF = 0x00;
     DDRK = 0x00;
     ADCSRA = 0x86;
@@ -91,14 +85,20 @@ void ADC_enable()
 }
 
 
-void init_devices()
+void init_devices()          // 
 {
     DDRC = 0xF7;
     PORTC = 0x28;
 }
 
 
-void uart0_init(void)
+/* Function To Initialize UART0
+   desired baud rate:9600
+   actual baud rate:9600 (error 0.0%)
+   char size: 8 bit
+   parity: Disabled  */
+
+void uart0_init(void)  
 {
     UCSR0B = 0x00; //disable while setting baud rate
     UCSR0A = 0x00;
@@ -109,54 +109,56 @@ void uart0_init(void)
 }
 
 
-void initialize()
+
+void initialize()           
 {
+	// Function to call all the functions initializing the ports
+	
     Motion_Configurations();
     ADC_enable();
     init_devices();
 
-    cli();
+    cli();       // Clears the global interrupts
 
     Left_Encoder_Pin_Configuration();
     Right_Encoder_Pin_Configuration();
     Right_Wheel_Interrupt_Pin();
     Left_Wheel_Interrupt_Pin();
 
-    sei();
+    sei();       // Enables the global interrupts
 
 }
 
 
-void init_xbee()
-{
-    cli();
+void init_xbee()               
+{   
+    // Calling the function to initialize serial communication via XBee
+	
+	cli();
     uart0_init(); //Initialize UART1 for serial communication
     sei();
 }
 
 
 
-unsigned char Read_Sensor(unsigned char channel)
-{
-    unsigned char reading;
+unsigned char Read_Sensor(unsigned char channel)       
+{  
+	// Function to read the value from ADC and return it as an unsigned character
+    
+	unsigned char reading;
 
     if(channel>7)
-    {
-        ADCSRB = 0x08;
-    }
+    { ADCSRB = 0x08;
+       }
 
     channel = channel & 0x07;
-
     ADMUX= 0x20 | channel;
+    ADCSRA = ADCSRA | 0x40;     //Set start conversion bit
 
-    ADCSRA = ADCSRA | 0x40; //Set start conversion bit
-
-    while((ADCSRA&0x10)==0) {} //Wait for ADC conversion to complete
+    while((ADCSRA&0x10)==0);  //Wait for ADC conversion to complete
 
     reading=ADCH;
-
     ADCSRA = ADCSRA|0x10; //clear ADIF (ADC Interrupt Flag) by writing 1 to it
-
     ADCSRB = 0x00;
 
     return reading;
@@ -164,6 +166,8 @@ unsigned char Read_Sensor(unsigned char channel)
 }
 
 
+//------------------------------------------------------------------------
+// Motion functions: moving the bot forward, reverse, left and right
 
 void forward_motion()
 {
@@ -175,7 +179,7 @@ void backward_motion()
     PORTA = 0x09;
 }
 
-void left_motion()                            // Motion functions: moving the bot forward, reverse, left and right
+void left_motion()                           
 {
     PORTA = 0x05;
 }
@@ -190,9 +194,11 @@ void stop_motion()
     PORTA = 0x00;
 }
 
+//-----------------------------------------------------------------------
 
 
-void velocity (unsigned char left_motor, unsigned char right_motor)
+
+void velocity (unsigned char left_motor, unsigned char right_motor)       // Function to initialize the registers for motion control using PWM
 {
     OCR5AL = (unsigned char)left_motor;
     OCR5BL = (unsigned char)right_motor;
@@ -202,6 +208,14 @@ void velocity (unsigned char left_motor, unsigned char right_motor)
 
 double get_angle()                               // Return the angle turned by the bot
 {
+   
+    /*************************
+    88 pulses for 360 degrees => 4.090 degrees per count
+	The angle rotated is calculated by measuring the number of counts 
+	and multiplying it by 4.090 to ger the degrees
+
+    *************************/
+
     double angle = 4.090*(Shaft_Counter_Right_Wheel + Shaft_Counter_Left_Wheel)/2;
     return angle;
 }
@@ -210,22 +224,20 @@ double get_angle()                               // Return the angle turned by t
 
 void Left_Rotation_Degrees(int Degrees)
 {
-    init_x = current_x;
+    /* Function to rotate bot to the left by a specified angle
+       The angle rotated is measured using data from the shaft encoders    
+	  */
+	
+	init_x = current_x;
     init_y = current_y;
-
-    /*************************
-    88 pulses for 360 degrees rotation 4.090 degrees per count
-
-    *************************/
 
     left_motion(); //Turn left
 
-    float Reqd_Shaft_Counter = (float) Degrees/ 4.090; // division by resolution to get shaft count
+    float Reqd_Shaft_Counter = (float) Degrees/ 4.090;                // division by resolution to get shaft count
     Reqd_Shaft_Counter = (unsigned int) Reqd_Shaft_Counter;
     Shaft_Counter_Left_Wheel = 0;
     Shaft_Counter_Right_Wheel = 0;
-    double initial_theta = current_theta;                      // Rotate bot to the left by a specified angle
-    // The angle rotated is measured using data from the shaft encoders
+    double initial_theta = current_theta;                      
 
     while (1)
     {
@@ -252,13 +264,12 @@ void Left_Rotation_Degrees(int Degrees)
 
 void Right_Rotation_Degrees(int Degrees)
 {
-    init_x = current_x;
+     /* Rotate bot to the right by a specified angle
+        The angle rotated is measured using data from the shaft encoders
+       */	 
+	 
+	init_x = current_x;
     init_y = current_y;
-
-    /*******************
-    88 pulses for 360 degrees rotation 4.090 degrees per count
-
-    ********************/
 
     right_motion(); //Turn right
 
@@ -267,9 +278,8 @@ void Right_Rotation_Degrees(int Degrees)
     Shaft_Counter_Left_Wheel = 0;
     Shaft_Counter_Right_Wheel = 0;
     double initial_theta = current_theta;
-    // Rotate bot to the right by a specified angle
-    // The angle rotated is measured using data from the shaft encoders
-    while (1)
+    
+	while (1)
     {
         current_theta = initial_theta + get_angle();
         if(current_theta<0)
@@ -293,9 +303,11 @@ void Right_Rotation_Degrees(int Degrees)
 
 
 
-unsigned int convert(unsigned char reading)                   // Convert the character reading from the ADC to intger value
-{
-    int dist;
+unsigned int convert(unsigned char reading)                  
+ {
+     // Function to convert the character reading from the ADC to integer value
+    
+	int dist;
     dist = (int)(10.00*(2799.6*(1.00/(pow(reading,1.1546)))));
     return dist;
 
